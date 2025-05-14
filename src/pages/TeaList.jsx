@@ -26,6 +26,7 @@ import { toast } from 'react-toastify'
 const TeaList = () => {
   const [teas, setTeas] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [minRating, setMinRating] = useState(0)
   const { user, isAdmin } = useAuth()
   const navigate = useNavigate()
 
@@ -64,15 +65,24 @@ const TeaList = () => {
     navigate(`/teas/${id}/edit`)
   }
 
-  const filteredTeas = teas.filter((tea) =>
-    tea.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tea.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tea.origin.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTeas = teas.filter(
+    (tea) =>
+      (tea.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tea.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tea.origin.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (tea.averageRating || 0) >= minRating
   )
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+      <Box
+        sx={{
+          display: { xs: 'block', sm: 'flex' },
+          justifyContent: 'space-between',
+          mb: 3,
+          gap: 2,
+        }}
+      >
         <TextField
           label="Search teas"
           variant="outlined"
@@ -81,17 +91,27 @@ const TeaList = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{ width: 300 }}
         />
-        {user && (
-          <Tooltip title="Add new tea">
-            <IconButton
-              color="primary"
-              onClick={() => navigate('/teas/add')}
-              sx={{ ml: 2 }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body" sx={{ mr: 1 }}>
+            Rating:
+          </Typography>
+          <Rating
+            value={minRating}
+            onChange={(e, newValue) => setMinRating(newValue || 0)}
+            size="normal"
+          />
+          {user && (
+            <Tooltip title="Add new tea">
+              <IconButton
+                color="primary"
+                onClick={() => navigate('/teas/add')}
+                sx={{ ml: 2 }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
 
       <Grid container spacing={3}>
@@ -110,28 +130,43 @@ const TeaList = () => {
                   <Typography variant="h6" component="h2" gutterBottom>
                     {tea.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     {tea.description}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Origin: {tea.origin}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     Created by: {tea.createdBy}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                    <Rating value={tea.averageRating || 0} readOnly size="small" />
-                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                      ({tea.averageRating ? tea.averageRating.toFixed(1) : 'No ratings'})
+                    <Rating
+                      value={tea.averageRating || 0}
+                      readOnly
+                      size="small"
+                    />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      (
+                      {tea.averageRating
+                        ? tea.averageRating.toFixed(1)
+                        : 'No ratings'}
+                      )
                     </Typography>
                   </Box>
                 </CardContent>
               </CardActionArea>
-              <CardActions>
-                <Button size="small" onClick={() => navigate(`/teas/${tea.id}`)}>
-                  View Details
-                </Button>
-              </CardActions>
               {(isAdmin || (user && tea.createdBy === user.sub)) && (
                 <Box
                   sx={{
@@ -169,4 +204,4 @@ const TeaList = () => {
   )
 }
 
-export default TeaList 
+export default TeaList

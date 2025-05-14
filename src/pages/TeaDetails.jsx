@@ -52,8 +52,9 @@ const TeaDetails = () => {
 
   const fetchUserRating = async () => {
     try {
-      const response = await axios.get(`/api/teas/${id}/israted`)
-      setUserRating(response.data.rating || 0)
+      const response = await axios.get(`/api/teas/${id}/rated`)
+      const rating = Number(response.data || 0)
+      setUserRating(rating)
     } catch (error) {
       console.error('Failed to fetch user rating:', error)
     }
@@ -106,17 +107,21 @@ const TeaDetails = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 2,
+          }}
+        >
           <Typography variant="h4" component="h1" gutterBottom>
             {tea.name}
           </Typography>
           {(isAdmin || (user && tea.createdBy === user.sub)) && (
             <Box>
               <Tooltip title="Edit tea">
-                <IconButton
-                  onClick={handleEdit}
-                  sx={{ mr: 1 }}
-                >
+                <IconButton onClick={handleEdit} sx={{ mr: 1 }}>
                   <EditIcon />
                 </IconButton>
               </Tooltip>
@@ -137,11 +142,7 @@ const TeaDetails = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Rating
-            value={tea.averageRating || 0}
-            readOnly
-            size="large"
-          />
+          <Rating value={tea.averageRating || 0} readOnly size="large" />
           <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
             ({tea.averageRating ? tea.averageRating.toFixed(1) : 'No ratings'})
           </Typography>
@@ -157,7 +158,11 @@ const TeaDetails = () => {
               disabled={userRating > 0}
             />
             {userRating > 0 && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mt: 1 }}
+              >
                 You have already rated this tea
               </Typography>
             )}
@@ -168,4 +173,4 @@ const TeaDetails = () => {
   )
 }
 
-export default TeaDetails 
+export default TeaDetails
